@@ -1,13 +1,23 @@
 ORG 0
 BITS 16
 
+_start: ;create fake BPB for our bootloader so that BIOS wont mess the bootloader
+    jmp short start
+    nop
+times 33 db 0
+
+
 start:
+    jmp 0x7c0:step2 ;set code segment to 0x7c0
+
+step2:
+    ;Dont rely BIOS set 0x7c0 for us
     cli ;disable  interrups
     mov ax, 0x7c0
     mov ds, ax
     mov es, ax
     mov ax, 0x00
-    mov ss, ax
+    mov ss, ax  
     mov sp, 0x7c00
     sti ;enable interrups
 

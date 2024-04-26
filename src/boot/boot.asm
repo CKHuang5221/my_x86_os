@@ -61,16 +61,74 @@ gdt_descripter:
     dd gdt_start
 
 [BITS 32]
-load32:
-    mov ax, DATA_SEG
-    mov ds, ax
-    mov ss, ax
-    mov es, ax
-    mov gs, ax
-    mov fs, ax
-    mov ebp, 0x00200000
-    mov esp, ebp
-    jmp $
+load32:     ;load kernel to addr 0x0100000
+    mov eax, 1 ;sector 1
+    mov ecx, 100 ;reapet 100 times
+    mov edi, 0x0100000 ;destinate addr
+    call ata_lba_read   ;start to ata read
+
+    ;once we are done reading kernel to addr 0x0100000, we can jmp there
+    jmp CODE_SEG:0x0100000
+
+ata_lba_read:
+    mov ebx, eax, ; Backup the LBA
+    ; Send the highest 8 bits of the lba to hard disk controller
+    shr eax, 24
+    or eax, 0xE0 ; Select the  master drive
+    mov dx, 0x1F6
+    out dx, al
+    ; Finished sending the highest 8 bits of the lba
+
+    ; Send the total sectors to read
+    mov eax, ecx
+    mov dx, 0x1F2
+    out dx, al
+    ; Finished sending the total sectors to read
+
+    ; Send more bits of the LBA
+    mov eax, ebx ; Restore the backup LBA
+    mov dx, 0x1F3
+    out dx, al
+    ; Finished sending more bits of the LBA
+
+    ; Send more bits of the LBA
+    mov dx, 0x1F4
+    mov eax, ebx ; Restore the backup LBA
+    shr eax, 8
+    out dx, al
+    ; Finished sending more bits of the LBA
+
+    ; Send upper 16 bits of the LBA
+    mov dx, 0x1F5
+    mov eax, ebx ; Restore the backup LBA
+    shr eax, 16
+    out dx, al
+    ; Finished sending upper 16 bits of the LBA
+
+    mov dx, 0x1f7
+    mov al, 0x20
+    out dx, al
+
+    ; Read all sectors into memory
+.next_sector:
+    push ecx
+
+; Checking if we need to read
+.try_again:
+    mov dx, 0x1f7
+    in al, dx
+    test al, 8
+    jz .try_again
+
+; We need to read 256 words at a time
+    mov ecx, 256
+    mov dx, 0x1F0
+    rep insw
+    pop ecx
+    loop .next_sector
+    ; End of reading sectors into memory
+    ret
+
 
 times 510 - ($ - $$) db 0   ; $ means current addr, $$ means segment addr
 ;dw 0xAA55   ;remember intel use little endian

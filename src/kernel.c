@@ -1,10 +1,12 @@
 #include "kernel.h"
 #include <stdint.h> //for uint16_t
 #include <stddef.h> //for size_t
+#include "idt/idt.h"
 
 uint16_t* video_mem = 0;
 int terminal_col = 0;
 int terminal_row = 0;
+
 
 uint16_t terminal_make_char(char c, char color){
     return (color << 8) | c;    //combine character and color to 16 bits
@@ -64,7 +66,9 @@ void print(const char* str){
 void kernel_main(){
     
     terminal_init();
-    //video_mem[0] = 0x0341;  //remember little endian
-    //terminal_write_char('Q', 2);
-    print("abc \n efg");
+    print("Welcome!\n");
+
+    //initialize the interrup descriptor table
+    idt_init();
+
 }

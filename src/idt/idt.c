@@ -2,11 +2,23 @@
 #include "config.h"
 #include "kernel.h"
 #include "memory/memory.h"
+#include "io/io.h"
 
 struct idt_desc idt_descriptors[TOTAL_INTERRUPTS];
 struct idtr_desc idtr_descriptor;
 
 extern void idt_load(struct idtr_desc* ptr);
+extern void int21h();
+extern void no_interrupt();
+
+void no_interrupt_handler(){
+    outb(PIC1_COMMAND, PIC_EOI);   //tell pic we are done handling
+}
+
+void int21h_handler(){
+    print("keyboard press\n");
+    outb(PIC1_COMMAND, PIC_EOI); 
+}
 
 void idt_no_0(){
     print("Divide by zero error\n");
@@ -27,8 +39,12 @@ void idt_init(){
     idtr_descriptor.limit = sizeof(idt_descriptors) - 1;
     idtr_descriptor.base = (uint32_t)idt_descriptors;
 
-    idt_set(0, idt_no_0);   // set idt_descriptors[interrupt_no] -> idt_no_0
+    for(int i = 1; i<TOTAL_INTERRUPTS; i++){
+        idt_set(i, no_interrupt);
+    }
 
+    idt_set(0, idt_no_0);   // set idt_descriptors[interrupt_no] -> idt_no_0
+    idt_set(0x20, int21h);
     //load interrupt descriptor table
     idt_load(&idtr_descriptor);
 }

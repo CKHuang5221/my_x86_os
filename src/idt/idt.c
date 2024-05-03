@@ -44,7 +44,7 @@ void idt_init(){
     }
 
     idt_set(0, idt_no_0);   // set idt_descriptors[interrupt_no] -> idt_no_0
-    idt_set(0x20, int21h);
+    idt_set(0x21, int21h);
     //load interrupt descriptor table
     idt_load(&idtr_descriptor);
 }

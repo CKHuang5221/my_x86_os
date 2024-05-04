@@ -4,6 +4,8 @@
 #include "idt/idt.h"
 #include "io/io.h"
 #include "memory/heap/kheap.h"
+#include "memory/paging/paging.h"
+
 
 uint16_t* video_mem = 0;
 int terminal_col = 0;
@@ -61,9 +63,11 @@ size_t strlen( const char* str ){
 void print(const char* str){
     int len = strlen(str);
     for(int i = 0; i<len; i++){
-        terminal_write_char(str[i], 1);
+        terminal_write_char(str[i], 3);
     }
 }
+
+static struct paging_4gb_chunk* kernel_chunk  = 0;
 
 void kernel_main(){
     
@@ -75,6 +79,18 @@ void kernel_main(){
 
     //initialize the interrup descriptor table
     idt_init();
+
+    //1. setup paging
+    kernel_chunk =  paging_new_4gb(PAGING_IS_WRITEABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
+    //2. switch to kernel chunk
+    paging_switch( paging_4gb_chunk_get_directory(kernel_chunk) );
+
+    char* ptr = kmalloc(4096);
+    
+    paging_set(paging_4gb_chunk_get_directory(kernel_chunk), (void*)0x1000, (uint32_t)ptr | PAGING_ACCESS_FROM_ALL | PAGING_IS_PRESENT | PAGING_IS_WRITEABLE );
+
+    //3. enable paging
+    enable_paging();
 
     //enable interrupts
     enable_interrupts();

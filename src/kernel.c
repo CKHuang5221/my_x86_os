@@ -78,6 +78,9 @@ void kernel_main(){
     //init the heap
     kheap_init();
 
+    //search and init disks
+    disk_search_and_init();
+
     //initialize the interrup descriptor table
     idt_init();
 
@@ -87,12 +90,6 @@ void kernel_main(){
     paging_switch( paging_4gb_chunk_get_directory(kernel_chunk) );
     //3. enable paging
     enable_paging();
-
-    char* buf[512];
-    int a = disk_read_sector(0, 1, buf);
-    
-    
-    a++;
 
     //enable interrupts
     enable_interrupts();

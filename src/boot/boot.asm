@@ -4,70 +4,68 @@ BITS 16
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
 
-_start: ;create fake BPB for our bootloader so that BIOS wont mess the bootloader
+_start:
     jmp short start
     nop
-times 33 db 0
 
-
+ times 33 db 0
+ 
 start:
-    jmp 0:step2 ;set code segment to 0x7c0
+    jmp 0:step2
 
 step2:
-    ;Dont rely BIOS set 0x7c0 for us
-    cli ;disable  interrups
-    mov ax, 0
+    cli ; Clear Interrupts
+    mov ax, 0x00
     mov ds, ax
     mov es, ax
-    mov ss, ax  
+    mov ss, ax
     mov sp, 0x7c00
-    sti ;enable interrups
+    sti ; Enables Interrupts
 
 .load_protected:
     cli
-    lgdt[gdt_descripter]
+    lgdt[gdt_descriptor]
     mov eax, cr0
     or eax, 0x1
     mov cr0, eax
     jmp CODE_SEG:load32
-
-;GDT
+    
+; GDT
 gdt_start:
-gdt_null:   ;64bits of 0
+gdt_null:
     dd 0x0
     dd 0x0
 
-;offset 0x8 from gdt_start since gdt_null is 8bytes
-gdt_code:   ;CS should point to this
-    dw 0xffff   ;segment limit first 0~15 bits
-    dw 0    ;base first 0~15bits
-    db 0    ;base 16~23 bits
-    db 0x9a ;access byte
-    db 11001111b    ;high 4 bits flags and low 4 bits flag
-    db 0    ;base 24~31bits
+; offset 0x8
+gdt_code:     ; CS SHOULD POINT TO THIS
+    dw 0xffff ; Segment limit first 0-15 bits
+    dw 0      ; Base first 0-15 bits
+    db 0      ; Base 16-23 bits
+    db 0x9a   ; Access byte
+    db 11001111b ; High 4 bit flags and the low 4 bit flags
+    db 0        ; Base 24-31 bits
 
-;offset 0x10
-gdt_data:   ; link to DS SS ES FS GS
-    dw 0xffff   ;segment limit first 0~15 bits
-    dw 0    ;base first 0~15bits
-    db 0    ;base 16~23 bits
-    db 0x92 ;access byte
-    db 11001111b    ;high 4 bits flags and low 4 bits flag
-    db 0    ;base 24~31bits
+; offset 0x10
+gdt_data:      ; DS, SS, ES, FS, GS
+    dw 0xffff ; Segment limit first 0-15 bits
+    dw 0      ; Base first 0-15 bits
+    db 0      ; Base 16-23 bits
+    db 0x92   ; Access byte
+    db 11001111b ; High 4 bit flags and the low 4 bit flags
+    db 0        ; Base 24-31 bits
+
 gdt_end:
 
-gdt_descripter:
+gdt_descriptor:
     dw gdt_end - gdt_start-1
     dd gdt_start
-
-[BITS 32]
-load32:     ;load kernel to addr 0x0100000
-    mov eax, 1 ;sector 1
-    mov ecx, 100 ;reapet 100 times
-    mov edi, 0x0100000 ;destinate addr
-    call ata_lba_read   ;start to ata read
-
-    ;once we are done reading kernel to addr 0x0100000, we can jmp there
+ 
+ [BITS 32]
+ load32:
+    mov eax, 1
+    mov ecx, 100
+    mov edi, 0x0100000
+    call ata_lba_read
     jmp CODE_SEG:0x0100000
 
 ata_lba_read:
@@ -129,8 +127,5 @@ ata_lba_read:
     ; End of reading sectors into memory
     ret
 
-
-times 510 - ($ - $$) db 0   ; $ means current addr, $$ means segment addr
-;dw 0xAA55   ;remember intel use little endian
-db 0x55
-db 0xAA
+times 510-($ - $$) db 0
+dw 0xAA55

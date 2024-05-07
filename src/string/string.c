@@ -25,11 +25,12 @@ int strnlen(const char* ptr, int max)
 }
 
 
-bool isdigit(char c){
-    return (c >= 48) && (c <= 57);
-}
 
-//return interger 0~9 for ascii 0~9
-int tonumericdigit(char c){
+bool isdigit(char c)
+{
+    return c >= 48 && c <= 57;
+}
+int tonumericdigit(char c)
+{
     return c - 48;
 }

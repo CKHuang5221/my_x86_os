@@ -2,6 +2,7 @@
     "files.associations": {
         "kernel.h": "c",
         "kheap.h": "c",
-        "paging.h": "c"
+        "paging.h": "c",
+        "streamer.h": "c"
     }
 }

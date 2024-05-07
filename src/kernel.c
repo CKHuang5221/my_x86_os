@@ -1,92 +1,104 @@
 #include "kernel.h"
-#include <stdint.h> //for uint16_t
-#include <stddef.h> //for size_t
+#include <stddef.h>
+#include <stdint.h>
 #include "idt/idt.h"
-#include "io/io.h"
 #include "memory/heap/kheap.h"
 #include "memory/paging/paging.h"
 #include "string/string.h"
 #include "disk/disk.h"
 #include "fs/pparser.h"
+#include "disk/streamer.h"
 
 uint16_t* video_mem = 0;
-int terminal_col = 0;
-int terminal_row = 0;
+uint16_t terminal_row = 0;
+uint16_t terminal_col = 0;
 
-
-uint16_t terminal_make_char(char c, char color){
-    return (color << 8) | c;    //combine character and color to 16 bits
+uint16_t terminal_make_char(char c, char colour)
+{
+    return (colour << 8) | c;
 }
 
-void terminal_put_char(int x, int y, char c, char color){
-    video_mem[ (y * VGA_WIDTH) + x ] = terminal_make_char(c, color);
+void terminal_putchar(int x, int y, char c, char colour)
+{
+    video_mem[(y * VGA_WIDTH) + x] = terminal_make_char(c, colour);
 }
 
-void terminal_write_char(char c, char color){
-    if( c == '\n'){
-        terminal_row = terminal_row + 1; //next line
+void terminal_writechar(char c, char colour)
+{
+    if (c == '\n')
+    {
+        terminal_row += 1;
         terminal_col = 0;
         return;
     }
-    
-    terminal_put_char(terminal_col, terminal_row, c, color);
-    terminal_col = terminal_col + 1 ;
 
-    if(terminal_col >= VGA_WIDTH){  //next line
+    terminal_putchar(terminal_col, terminal_row, c, colour);
+    terminal_col += 1;
+    if (terminal_col >= VGA_WIDTH)
+    {
         terminal_col = 0;
-        terminal_row = terminal_row + 1;
+        terminal_row += 1;
     }
 }
-
-
-void terminal_init(){   //clear screen to all blank
-    terminal_col = 0;
-    terminal_row = 0;
+void terminal_initialize()
+{
     video_mem = (uint16_t*)(0xB8000);
-
-    for(int y = 0; y < VGA_HEIGHT; y++){
-        for(int x = 0; x < VGA_WIDTH; x++){
-            terminal_put_char(x, y, ' ', 0 );
+    terminal_row = 0;
+    terminal_col = 0;
+    for (int y = 0; y < VGA_HEIGHT; y++)
+    {
+        for (int x = 0; x < VGA_WIDTH; x++)
+        {
+            terminal_putchar(x, y, ' ', 0);
         }
-    }
-
+    }   
 }
 
-void print(const char* str){
-    int len = strlen(str);
-    for(int i = 0; i<len; i++){
-        terminal_write_char(str[i], 3);
+
+
+void print(const char* str)
+{
+    size_t len = strlen(str);
+    for (int i = 0; i < len; i++)
+    {
+        terminal_writechar(str[i], 15);
     }
 }
 
-static struct paging_4gb_chunk* kernel_chunk  = 0;
 
-void kernel_main(){
-    
-    terminal_init();
-    print("Welcome!\n");
+static struct paging_4gb_chunk* kernel_chunk = 0;
+void kernel_main()
+{
+    terminal_initialize();
+    print("Hello world!\ntest");
 
-    //init the heap
+    // Initialize the heap
     kheap_init();
 
-    //search and init disks
+    // Search and initialize the disks
     disk_search_and_init();
 
-    //initialize the interrup descriptor table
+    // Initialize the interrupt descriptor table
     idt_init();
 
-    //1. setup paging
-    kernel_chunk =  paging_new_4gb(PAGING_IS_WRITEABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
-    //2. switch to kernel chunk
-    paging_switch( paging_4gb_chunk_get_directory(kernel_chunk) );
-    //3. enable paging
-    enable_paging();
+    // Setup paging
+    kernel_chunk = paging_new_4gb(PAGING_IS_WRITEABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
+    
+    // Switch to kernel paging chunk
+    paging_switch(paging_4gb_chunk_get_directory(kernel_chunk));
 
-    //enable interrupts
+    // Enable paging
+    enable_paging();
+    
+    // Enable the system interrupts
     enable_interrupts();
 
-    struct path_root* root_path = pathparser_parse("0:/bin/os.bin", NULL);
-
-
-    if(root_path){}
+    struct disk_stream* stream = diskstreamer_new(0);
+    diskstreamer_seek(stream, 0x201);
+    unsigned char c = 0;
+    diskstreamer_read(stream, &c, 1);
+    if(c == 0xB8){
+        print("0xb8");
+    }
+    while(1) {}
 }

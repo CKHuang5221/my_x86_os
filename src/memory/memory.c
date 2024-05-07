@@ -10,6 +10,7 @@ void* memset(void* ptr, int c, size_t size)
     return ptr;
 }
 
+
 int memcmp(void* s1, void* s2, int count)
 {
     char* c1 = s1;

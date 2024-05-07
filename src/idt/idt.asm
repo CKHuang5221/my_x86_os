@@ -1,3 +1,5 @@
+;load idtr so that processor knows where is idt
+
 section .asm
 
 extern int21h_handler
@@ -17,16 +19,13 @@ disable_interrupts:
     cli
     ret
 
-
 idt_load:
     push ebp
     mov ebp, esp
-
     mov ebx, [ebp+8]
-    lidt [ebx]
-    pop ebp    
+    lidt[ebx]
+    pop ebp
     ret
-
 
 int21h:
     cli
@@ -43,5 +42,3 @@ no_interrupt:
     popad
     sti
     iret
-
-    

@@ -1,5 +1,5 @@
-#ifndef PATHPARSER_H
-#define PATHPARSER_H
+#ifndef PPARSER_H
+#define PPARSER_H
 
 struct path_root
 {
@@ -15,5 +15,6 @@ struct path_part
 
 struct path_root* pathparser_parse(const char* path, const char* current_directory_path);
 void pathparser_free(struct path_root* root);
+
 
 #endif

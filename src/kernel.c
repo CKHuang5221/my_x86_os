@@ -9,6 +9,8 @@
 #include "disk/disk.h"
 #include "fs/pparser.h"
 #include "disk/streamer.h"
+#include "fs/file.h"
+
 
 uint16_t* video_mem = 0;
 int terminal_col = 0;
@@ -70,6 +72,9 @@ void kernel_main(){
     //init the heap
     kheap_init();
 
+    //init filesystem(fat16)
+    fs_init();
+
     //search and init disks
     disk_search_and_init();
 
@@ -86,18 +91,5 @@ void kernel_main(){
     //enable interrupts
     enable_interrupts();
 
-    struct disk_stream* stream = diskstreamer_new(0);
-    diskstreamer_seek(stream, 0x201);
-    unsigned char c = 10;
-    diskstreamer_read(stream, &c, 1);
-    if(c == 0xB8){
-        print("0xB8!\n");
-    }
-    if(c == 0x00){
-        print("0x00!\n");
-    }
-    if(c == 10){
-        print("10!\n");
-    }
-    while(1){}
+
 }

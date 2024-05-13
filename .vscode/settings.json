@@ -3,6 +3,9 @@
         "kernel.h": "c",
         "kheap.h": "c",
         "paging.h": "c",
-        "streamer.h": "c"
+        "streamer.h": "c",
+        "pparser.h": "c",
+        "file.h": "c",
+        "ratio": "c"
     }
 }

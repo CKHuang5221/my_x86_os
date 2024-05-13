@@ -564,6 +564,7 @@ struct fat_item* fat16_new_fat_item_for_directory_item(struct disk* disk, struct
 
     f_item->type = FAT_ITEM_TYPE_FILE;
     f_item->item = fat16_clone_directory_item(item, sizeof(struct fat_directory_item));
+     
     return f_item;
 }
 
@@ -634,5 +635,6 @@ void* fat16_open(struct disk* disk, struct path_part* path, FILE_MODE mode)
     }
 
     descriptor->pos = 0;
+
     return descriptor;
 }

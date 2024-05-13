@@ -8,6 +8,7 @@
 
 void kernel_main();
 void print(const char* str);
+char* itoa(int num, char* str, int base);
 
 #define ERROR(value) (void*)(value)
 #define ERROR_I(value) (int)(value)

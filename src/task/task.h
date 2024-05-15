@@ -2,7 +2,7 @@
 #define TASK_H
 
 #include "config.h"
-#include "paging/paging.h"
+#include "memory/paging/paging.h"
 
 struct registors{
     uint32_t edi;
@@ -27,8 +27,14 @@ struct task{
     //the registors of task when the task get interrupt
     struct registors registors;
 
+    //double link list
     struct task* next;
     struct task* prev;
 };
+
+struct task* task_new();
+struct task* task_current();
+struct task* task_get_next();
+int task_free(struct task* task);
 
 #endif

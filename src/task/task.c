@@ -3,6 +3,7 @@
 #include "status.h"
 #include "memory/heap/kheap.h"
 #include "memory/memory.h"
+#include "process.h"
 
 //the current task is running
 struct task* current_task = 0;
@@ -11,14 +12,14 @@ struct task* current_task = 0;
 struct task* task_head = 0;
 struct task* task_tail = 0;
 
-int task_init(struct task* task);
+int task_init(struct task* task, struct process* process);
 
 //get current task;
 struct task* task_current(){
     return current_task;
 }
 
-struct task* task_new(){
+struct task* task_new(struct process* process){
     int res = 0;
     struct task* task = kzalloc(sizeof(struct task));
     if(!task){
@@ -26,7 +27,7 @@ struct task* task_new(){
         goto out;
     }
 
-    res = task_init(task);
+    res = task_init(task, process);
     if(res != PEACHOS_ALL_OK){
         goto out;
     }
@@ -89,7 +90,29 @@ int task_free(struct task* task){
     return 0;
 }
 
-int task_init(struct task* task){
+int task_switch(struct task* task){
+    current_task = task;
+    paging_switch(task->page_directory->directory_entries);
+    return 0;
+}
+
+int task_page(){
+    user_registers();
+    task_switch(current_task);
+    return 0;
+}
+
+void task_run_first_ever_task(){
+    if(!current_task){
+        panic("task_run_first_ever_task() : no current task exist");
+    }
+
+    task_switch(task_head);
+    task_return(&task_head->registers);
+     
+}
+
+int task_init(struct task* task, struct process* process){
     memset(task, 0, sizeof(struct task));
 
     //map inbtire 4 gb memory to its self
@@ -98,9 +121,11 @@ int task_init(struct task* task){
         return -EIO;
     }
 
-    task->registors.ip = PEACHOS_PROGRAM_VIRTUAL_ADDRESS;
-    task->registors.ss = USER_DATA_SEGMENT;
-    task->registors.esp = PEACHOS_PROGRAM_VIRTUAL_STACK_ADDRESS_START;
+    task->registers.ip = PEACHOS_PROGRAM_VIRTUAL_ADDRESS;
+    task->registers.ss = USER_DATA_SEGMENT;
+    task->registers.esp = PEACHOS_PROGRAM_VIRTUAL_STACK_ADDRESS_START;
+
+    task->process = process;
 
     return 0;
 }

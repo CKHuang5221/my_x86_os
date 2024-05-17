@@ -4,7 +4,7 @@
 #include "config.h"
 #include "memory/paging/paging.h"
 
-struct registors{
+struct registers{
     uint32_t edi;
     uint32_t esi;
     uint32_t ebp;
@@ -20,21 +20,34 @@ struct registors{
     uint32_t ss;
 };
 
+struct process;
 struct task{
     //page directory of the task
     struct paging_4gb_chunk* page_directory;
 
-    //the registors of task when the task get interrupt
-    struct registors registors;
+    //the registers of task when the task get interrupt
+    struct registers registers;
+
+    //the process of the task
+    struct process* process;
 
     //double link list
     struct task* next;
     struct task* prev;
 };
 
-struct task* task_new();
+struct task* task_new(struct process* process);
 struct task* task_current();
 struct task* task_get_next();
 int task_free(struct task* task);
+
+int task_switch(struct task* task);
+int task_page();
+
+void task_run_first_ever_task();
+
+void task_return(struct registers* regs);
+void restore_general_purpose_registers(struct registers* regs);
+void user_registers();
 
 #endif

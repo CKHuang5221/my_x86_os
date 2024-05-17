@@ -6,6 +6,8 @@
         "streamer.h": "c",
         "pparser.h": "c",
         "file.h": "c",
-        "ratio": "c"
+        "ratio": "c",
+        "chrono": "c",
+        "string.h": "c"
     }
 }

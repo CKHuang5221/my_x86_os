@@ -17,6 +17,7 @@
 #include "task/task.h"
 #include "task/process.h"
 #include "status.h"
+#include "isr80h/isr80h.h"
 
 uint16_t* video_mem = 0;
 int terminal_col = 0;
@@ -120,6 +121,12 @@ void panic(const char* msg){
     while(1){}
 }
 
+void kernel_page()
+{
+    kernel_registers();
+    paging_switch(kernel_chunk);
+}
+
 struct tss tss;
 struct gdt gdt_real[PEACHOS_TOTAL_GDT_SEGMENTS];
 struct gdt_structured gdt_structured[PEACHOS_TOTAL_GDT_SEGMENTS] = {
@@ -168,6 +175,9 @@ void kernel_main(){
     paging_switch(kernel_chunk);
     //3. enable paging
     enable_paging();
+
+    // Register the kernel commands
+    isr80h_register_commands();
 
     struct process* process = 0;
     int res = process_load("0:/blank.bin", &process);

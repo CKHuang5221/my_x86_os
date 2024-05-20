@@ -164,9 +164,18 @@ void task_current_save_state(struct interrupt_frame *frame)
     task_save_state(task, frame);
 }
 
+//switch to current task's page directory
 int task_page(){
     user_registers();
     task_switch(current_task);
+    return 0;
+}
+
+//switch to input task's page directory
+int task_page_task(struct task* task)
+{
+    user_registers();
+    paging_switch(task->page_directory);
     return 0;
 }
 
@@ -197,4 +206,22 @@ int task_init(struct task* task, struct process* process){
     task->process = process;
 
     return 0;
+}
+
+// peek task's stack
+void* task_get_stack_item(struct task* task, int index)
+{
+    void* result = 0;
+
+    uint32_t* sp_ptr = (uint32_t*) task->registers.esp;
+
+    // Switch to the given tasks page
+    task_page_task(task);
+
+    result = (void*) sp_ptr[index];
+
+    // Switch back to the kernel page
+    kernel_page();
+
+    return result;
 }

@@ -12,7 +12,7 @@
 //the current process that is running
 struct process* current_process = 0;
 
-static struct process* processes[PEACHOS_MAX_PROCESSES];
+static struct process* processes[PEACHOS_MAX_PROCESSES] = {};
 
 static void process_init(struct process* process){
     memset(process, 0, sizeof(struct process));
@@ -33,7 +33,8 @@ struct process* process_get(int process_id){
 static int process_load_binary(const char* filename, struct process* process){
     int res = 0;
     int fd = fopen(filename, "r");
-    if(!fd){
+    if (!fd)
+    {
         res = -EIO;
         goto out;
     }
@@ -41,12 +42,14 @@ static int process_load_binary(const char* filename, struct process* process){
     //get file size so we can malloc memory for process
     struct file_stat stat;
     res = fstat(fd, &stat);
-    if(res != PEACHOS_ALL_OK){
+    if (res != PEACHOS_ALL_OK)
+    {
         goto out;
     }
 
-    void* program_data_ptr = kzalloc(sizeof(stat.filesize));
-    if(!program_data_ptr){
+    void* program_data_ptr = kzalloc(stat.filesize);
+    if (!program_data_ptr)
+    {
         res = -ENOMEM;
         goto out;
     }

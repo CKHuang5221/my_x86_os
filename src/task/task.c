@@ -118,6 +118,7 @@ void task_save_state(struct task *task, struct interrupt_frame *frame)
 
 int copy_string_from_task(struct task* task, void* virtual, void* phys, int max)
 {
+    print("start copy");
     if (max >= PAGING_PAGE_SIZE)
     {
         return -EINVARG;
@@ -146,6 +147,10 @@ int copy_string_from_task(struct task* task, void* virtual, void* phys, int max)
     }
 
     strncpy(phys, tmp, max);
+    if( *(char*)phys == 0){
+        print("no copy");
+    }
+ 
 
 out_free:
     kfree(tmp);

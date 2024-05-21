@@ -18,6 +18,7 @@
 #include "task/process.h"
 #include "status.h"
 #include "isr80h/isr80h.h"
+#include "keyboard/keyboard.h"
 
 uint16_t* video_mem = 0;
 int terminal_col = 0;
@@ -178,6 +179,9 @@ void kernel_main(){
 
     // Register the kernel commands
     isr80h_register_commands();
+
+    // Initialize all the system keyboards
+    keyboard_init();
 
     struct process* process = 0;
     int res = process_load("0:/blank.bin", &process);

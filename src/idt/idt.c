@@ -11,17 +11,18 @@ struct idtr_desc idtr_descriptor;
 static ISR80H_COMMAND isr80h_commands[PEACHOS_MAX_ISR80H_COMMANDS];
 
 extern void idt_load(struct idtr_desc* ptr);
-extern void int21h();
 extern void no_interrupt();
 extern void isr80h_wrapper();
+extern void* interrupt_pointer_table[PEACHOS_TOTAL_INTERRUPTS];
 
 void no_interrupt_handler(){
     outb(PIC1_COMMAND, PIC_EOI);   //tell pic we are done handling
 }
 
-void int21h_handler(){
-    print("keyboard press\n");
-    outb(PIC1_COMMAND, PIC_EOI); 
+void interrupt_handler(int interrupt, struct interrupt_frame* frame)
+{
+
+    outb(PIC1_COMMAND, PIC_EOI);   //tell pic we are done handling
 }
 
 void idt_no_0(){
@@ -44,11 +45,10 @@ void idt_init(){
     idtr_descriptor.base = (uint32_t)idt_descriptors;
 
     for(int i = 1; i<PEACHOS_TOTAL_INTERRUPTS; i++){
-        idt_set(i, no_interrupt);
+        idt_set(i, interrupt_pointer_table[i]);
     }
 
     idt_set(0, idt_no_0);   // set idt_descriptors[interrupt_no] -> idt_no_0
-    idt_set(0x21, int21h);
     idt_set(0x80, isr80h_wrapper);
     //load interrupt descriptor table
     idt_load(&idtr_descriptor);

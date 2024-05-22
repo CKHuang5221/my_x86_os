@@ -12,6 +12,7 @@ char* itoa(int num, char* str, int base);
 void panic(const char* msg);
 void kernel_page();
 void kernel_registers();
+void terminal_writechar(char c, char colour);
 
 #define ERROR(value) (void*)(value)
 #define ERROR_I(value) (int)(value)

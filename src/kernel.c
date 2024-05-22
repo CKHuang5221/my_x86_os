@@ -78,7 +78,7 @@ void terminal_put_char(int x, int y, char c, char color){
     video_mem[ (y * VGA_WIDTH) + x ] = terminal_make_char(c, color);
 }
 
-void terminal_write_char(char c, char color){
+void terminal_writechar(char c, char color){
     if( c == '\n'){
         terminal_row = terminal_row + 1; //next line
         terminal_col = 0;
@@ -111,7 +111,7 @@ void terminal_init(){   //clear screen to all blank
 void print(const char* str){
     int len = strlen(str);
     for(int i = 0; i<len; i++){
-        terminal_write_char(str[i], 3);
+        terminal_writechar(str[i], 3);
     }
 }
 

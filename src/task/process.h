@@ -40,4 +40,7 @@ int process_load(const char* filename, struct process** process);
 struct process* process_current();
 struct process* process_get(int process_id);
 
+int process_switch(struct process* process);
+int process_load_switch(const char* filename, struct process** process);
+
 #endif

@@ -78,10 +78,34 @@ void terminal_put_char(int x, int y, char c, char color){
     video_mem[ (y * VGA_WIDTH) + x ] = terminal_make_char(c, color);
 }
 
+void terminal_backspace()
+{
+    if (terminal_row == 0 && terminal_col == 0)
+    {
+        return;
+    }
+
+    if (terminal_col == 0)
+    {
+        terminal_row -= 1;
+        terminal_col = VGA_WIDTH;
+    }
+
+    terminal_col -=1;
+    terminal_writechar(' ', 15);
+    terminal_col -=1;
+}
+
 void terminal_writechar(char c, char color){
     if( c == '\n'){
         terminal_row = terminal_row + 1; //next line
         terminal_col = 0;
+        return;
+    }
+    
+    if (c == 0x08)
+    {
+        terminal_backspace();
         return;
     }
     

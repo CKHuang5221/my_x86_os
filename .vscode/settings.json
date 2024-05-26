@@ -8,6 +8,7 @@
         "file.h": "c",
         "ratio": "c",
         "chrono": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "elf.h": "c"
     }
 }

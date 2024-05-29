@@ -1,5 +1,6 @@
 #include "peachos.h"
 #include "stdlib.h"
+#include "stdio.h"
 
 int main(int argc, char** argv)
 {
@@ -9,6 +10,7 @@ int main(int argc, char** argv)
     free(ptr);
 
     print(itoa(-8763));
+    putchar('Z');
 
     while(1) 
     {

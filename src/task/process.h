@@ -54,4 +54,6 @@ struct process* process_get(int process_id);
 int process_switch(struct process* process);
 int process_load_switch(const char* filename, struct process** process);
 
+void* process_malloc(struct process* process, size_t size);
+
 #endif

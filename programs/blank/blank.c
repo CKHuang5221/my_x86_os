@@ -3,10 +3,12 @@
 
 int main(int argc, char** argv)
 {
-    print("Hello how are you!");
+    print("Hello how are you!\n");
 
     void* ptr = malloc(512);
     free(ptr);
+
+    print(itoa(-8763));
 
     while(1) 
     {

@@ -6,6 +6,8 @@ int main(int argc, char** argv)
 {
     print("Hello how are you!\n");
 
+    printf("My age is %i\n", 98);
+
     void* ptr = malloc(512);
     free(ptr);
 

@@ -4,22 +4,13 @@
 
 int main(int argc, char** argv)
 {
-    print("Hello how are you!\n");
 
     printf("My age is %i\n", 98);
 
-    void* ptr = malloc(512);
-    free(ptr);
-
-    print(itoa(-8763));
-    putchar('Z');
 
     while(1) 
     {
-        if (getkey() != 0)
-        {
-            print("key was pressed\n");
-        }
+        
     }
     
     return 0;

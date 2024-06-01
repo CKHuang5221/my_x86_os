@@ -46,7 +46,7 @@ static int process_find_free_allocation_index(struct process* process)
     int res = -ENOMEM;
     for (int i = 0; i < PEACHOS_MAX_PROGRAM_ALLOCATIONS; i++)
     {
-        if (process->allocations[i] == 0)
+        if (process->allocations[i].ptr == 0)
         {
             res = i;
             break;
@@ -76,7 +76,7 @@ void* process_malloc(struct process* process, size_t size)
         goto out_err;
     }
     
-    process->allocations[index] = ptr;
+    process->allocations[index].ptr = ptr;
     return ptr;
 
 out_err:
@@ -91,7 +91,7 @@ static bool process_is_process_pointer(struct process* process, void* ptr)
 {
     for (int i = 0; i < PEACHOS_MAX_PROGRAM_ALLOCATIONS; i++)
     {
-        if (process->allocations[i] == ptr)
+        if (process->allocations[i].ptr == ptr)
             return true;
     }
 
@@ -102,9 +102,10 @@ static void process_allocation_unjoin(struct process* process, void* ptr)
 {
     for (int i = 0; i < PEACHOS_MAX_PROGRAM_ALLOCATIONS; i++)
     {
-        if (process->allocations[i] == ptr)
+        if (process->allocations[i].ptr == ptr)
         {
-            process->allocations[i] = 0x00;
+            process->allocations[i].ptr = 0x00;
+            process->allocations[i].size = 0;
         }
     }
 }

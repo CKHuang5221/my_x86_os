@@ -5,6 +5,7 @@
 #include "io/io.h"
 #include "task/task.h"
 #include "status.h"
+#include "task/process.h"
 
 struct idt_desc idt_descriptors[PEACHOS_TOTAL_INTERRUPTS];
 struct idtr_desc idtr_descriptor;
@@ -50,6 +51,13 @@ void idt_set(int interrupt_no, void* address){  //set interrup for ring3
 
 }
 
+
+void idt_handle_exception()
+{
+    process_terminate(task_current()->process);
+    task_next();
+}
+
 void idt_init(){
     memset(idt_descriptors, 0, sizeof(idt_descriptors));
     idtr_descriptor.limit = sizeof(idt_descriptors) - 1;
@@ -61,6 +69,12 @@ void idt_init(){
 
     idt_set(0, idt_no_0);   // set idt_descriptors[interrupt_no] -> idt_no_0
     idt_set(0x80, isr80h_wrapper);
+
+    for (int i = 0; i < 0x20; i++)
+    {
+        idt_register_interrupt_callback(i, idt_handle_exception);
+    }
+
     //load interrupt descriptor table
     idt_load(&idtr_descriptor);
 }
